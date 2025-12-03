@@ -58,7 +58,7 @@ export default function Navbar({ page, setPage, dark, setDark }) {
                         onClick={() => setPage("today")}
                     >
                         <img
-                            src="./public/target-icon.png"
+                            src="/target-icon.png"
                             className="w-7 h-7 -ml-1 group-hover:scale-110 transition"
                         />
                         <h1
