@@ -3,3 +3,38 @@
 :root {
     font-family: 'Poppins', sans-serif;
 }
+
+
+
+.calendar-light {
+  background: #fff !important;
+  color: #111 !important;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.calendar-light .react-calendar__navigation button {
+  color: #111 !important;
+}
+
+.calendar-light .react-calendar__tile--active {
+  background: #2563eb !important;
+  color: white !important;
+}
+
+
+.calendar-dark {
+  background: #0d1117 !important;
+  color: white !important;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.calendar-dark .react-calendar__navigation button {
+  color: white !important;
+}
+
+.calendar-dark .react-calendar__tile--active {
+  background: #2563eb !important;
+  color: white !important;
+}

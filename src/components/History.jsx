@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
@@ -9,21 +9,29 @@ export default function History({
     setPage,
     setSelectedDate,
 }) {
-
     const [mode, setMode] = useState("list");
 
-    // RANGE
-    const [start, setStart] = useState("2025-11-27");
-    const [end, setEnd] = useState("2025-12-03");
+    // LOAD RANGE DARI LOCALSTORAGE
+    const savedStart = localStorage.getItem("historyStart");
+    const savedEnd = localStorage.getItem("historyEnd");
 
-    // Calendar popup
+    const [start, setStart] = useState(savedStart || "2025-11-27");
+    const [end, setEnd] = useState(savedEnd || "2025-12-03");
+
+    
+    useEffect(() => {
+        localStorage.setItem("historyStart", start);
+        localStorage.setItem("historyEnd", end);
+    }, [start, end]);
+
+  
     const [showCal, setShowCal] = useState(false);
     const [range, setRange] = useState([
         new Date(start),
         new Date(end),
     ]);
 
-    // Get date list
+    // Generate date list
     const getDates = () => {
         const arr = [];
         let s = new Date(start);
@@ -48,7 +56,7 @@ export default function History({
     return (
         <div className="max-w-[1100px] mx-auto space-y-6">
 
-            {/* SWITCH LIST/BOARD */}
+            {/* SWITCH LIST / BOARD */}
             <div className="flex gap-3">
                 <button
                     onClick={() => setMode("list")}
@@ -77,7 +85,7 @@ export default function History({
                 </button>
             </div>
 
-            {/* DATE RANGE + CALENDAR */}
+            {/* DATE RANGE*/}
             <div className="relative">
                 <button
                     onClick={() => setShowCal(!showCal)}
@@ -92,7 +100,7 @@ export default function History({
 
                 {showCal && (
                     <div
-                        className={`absolute z-50 mt-2 p-4 rounded-xl shadow-xl border 
+                        className={`absolute z-50 mt-2 p-4 rounded-xl shadow-xl border
                             ${dark ? "bg-[#0d1117] border-gray-700 text-white" : "bg-white border-gray-300"}`}
                     >
                         <Calendar
@@ -103,7 +111,7 @@ export default function History({
                                 setEnd(value[1].toISOString().split("T")[0]);
                             }}
                             value={range}
-                            className="rounded-lg"
+                            className={dark ? "calendar-dark" : "calendar-light"}
                         />
 
                         <button
@@ -133,7 +141,6 @@ export default function History({
                                 className={`rounded-xl border shadow p-4 transition-all
                                     ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
                             >
-                                {/* HEADER */}
                                 <div
                                     className="flex justify-between items-center cursor-pointer"
                                     onClick={() => setOpen({ ...open, [ds]: !open[ds] })}
@@ -153,7 +160,6 @@ export default function History({
                                     </button>
                                 </div>
 
-                                {/* CONTENT */}
                                 {open[ds] && (
                                     <div className="mt-3">
                                         <p className="text-sm mb-1 opacity-80">{percent}%</p>
