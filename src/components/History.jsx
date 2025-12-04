@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 export default function History({
     tasks,
@@ -7,19 +9,21 @@ export default function History({
     setPage,
     setSelectedDate,
 }) {
+
     const [mode, setMode] = useState("list");
 
+    // RANGE
+    const [start, setStart] = useState("2025-11-27");
+    const [end, setEnd] = useState("2025-12-03");
 
-    const [start, setStart] = useState(() => localStorage.getItem("hStart") || "2025-11-27");
-    const [end, setEnd] = useState(() => localStorage.getItem("hEnd") || "2025-12-03");
+    // Calendar popup
+    const [showCal, setShowCal] = useState(false);
+    const [range, setRange] = useState([
+        new Date(start),
+        new Date(end),
+    ]);
 
-    // simpan ke localStorage biar tidak hilang
-    useEffect(() => {
-        localStorage.setItem("hStart", start);
-        localStorage.setItem("hEnd", end);
-    }, [start, end]);
-
-
+    // Get date list
     const getDates = () => {
         const arr = [];
         let s = new Date(start);
@@ -44,7 +48,7 @@ export default function History({
     return (
         <div className="max-w-[1100px] mx-auto space-y-6">
 
-            {/* SWITCH LIST */}
+            {/* SWITCH LIST/BOARD */}
             <div className="flex gap-3">
                 <button
                     onClick={() => setMode("list")}
@@ -73,48 +77,43 @@ export default function History({
                 </button>
             </div>
 
-
-            <div className="mt-2">
-                <input
-                    id="startInput"
-                    type="date"
-                    value={start}
-                    onChange={(e) => {
-                        setStart(e.target.value);
-
-                        setTimeout(() => {
-                            document.getElementById("endInput").showPicker();
-                        }, 200);
-                    }}
-                    className="hidden"
-                />
-                <input
-                    id="endInput"
-                    type="date"
-                    value={end}
-                    onChange={(e) => setEnd(e.target.value)}
-                    className="hidden"
-                />
+            {/* DATE RANGE + CALENDAR */}
+            <div className="relative">
                 <button
-                    onClick={() => document.getElementById("startInput").showPicker()}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer border font-semibold
-                        ${dark ? "bg-[#111820] text-white border-gray-700" : "bg-white text-black border-gray-300"}`}
+                    onClick={() => setShowCal(!showCal)}
+                    className={`px-4 py-2 rounded-lg border cursor-pointer flex items-center gap-2
+                        ${dark
+                            ? "bg-[#1e293b] border-gray-600 text-white"
+                            : "bg-white border-gray-300 text-black"
+                        }`}
                 >
-                    <span className="text-lg">📅</span>
-
-                    {new Date(start).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric"
-                    })}
-
-                    {" – "}
-
-                    {new Date(end).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric"
-                    })}
+                    📅 {new Date(start).toDateString()} — {new Date(end).toDateString()}
                 </button>
+
+                {showCal && (
+                    <div
+                        className={`absolute z-50 mt-2 p-4 rounded-xl shadow-xl border 
+                            ${dark ? "bg-[#0d1117] border-gray-700 text-white" : "bg-white border-gray-300"}`}
+                    >
+                        <Calendar
+                            selectRange={true}
+                            onChange={(value) => {
+                                setRange(value);
+                                setStart(value[0].toISOString().split("T")[0]);
+                                setEnd(value[1].toISOString().split("T")[0]);
+                            }}
+                            value={range}
+                            className="rounded-lg"
+                        />
+
+                        <button
+                            onClick={() => setShowCal(false)}
+                            className="w-full mt-3 px-3 py-1 bg-blue-600 text-white rounded cursor-pointer"
+                        >
+                            Done
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* LIST MODE */}
@@ -123,6 +122,7 @@ export default function History({
                     {dates.map((d) => {
                         const ds = format(d);
                         const dayTasks = tasks.filter((t) => t.date === ds);
+
                         const completed = dayTasks.filter((t) => t.completed);
                         const totalSP = completed.reduce((a, b) => a + b.points, 0);
                         const percent = Math.round((totalSP / defaultTarget) * 100);
@@ -131,13 +131,12 @@ export default function History({
                             <div
                                 key={ds}
                                 className={`rounded-xl border shadow p-4 transition-all
-                                ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
+                                    ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
                             >
+                                {/* HEADER */}
                                 <div
                                     className="flex justify-between items-center cursor-pointer"
-                                    onClick={() =>
-                                        setOpen({ ...open, [ds]: !open[ds] })
-                                    }
+                                    onClick={() => setOpen({ ...open, [ds]: !open[ds] })}
                                 >
                                     <h3 className="font-bold">
                                         {d.toDateString()} — {totalSP}/{defaultTarget} pts
@@ -154,11 +153,12 @@ export default function History({
                                     </button>
                                 </div>
 
+                                {/* CONTENT */}
                                 {open[ds] && (
                                     <div className="mt-3">
-                                        <span className="text-sm opacity-70">{percent}%</span>
+                                        <p className="text-sm mb-1 opacity-80">{percent}%</p>
 
-                                        <div className="h-2 bg-gray-300 rounded mb-3 mt-1">
+                                        <div className="h-2 bg-gray-300 rounded mb-3">
                                             <div
                                                 className="h-full bg-blue-600 rounded"
                                                 style={{ width: `${percent}%` }}
@@ -171,13 +171,14 @@ export default function History({
                                             dayTasks.map((t) => (
                                                 <p
                                                     key={t.id}
-                                                    className={`p-2 rounded border mb-2 transition-all ${t.completed
-                                                        ? dark
-                                                            ? "bg-blue-900 text-blue-200 border-blue-700"
-                                                            : "bg-blue-100 text-blue-800 border-blue-300"
-                                                        : dark
-                                                            ? "bg-[#1e293b] text-gray-200 border-[#334155]"
-                                                            : "bg-gray-100 text-gray-800 border-gray-300"
+                                                    className={`p-2 rounded border mb-2 transition-all
+                                                        ${t.completed
+                                                            ? dark
+                                                                ? "bg-blue-900 text-blue-200 border-blue-700"
+                                                                : "bg-blue-100 text-blue-800 border-blue-300"
+                                                            : dark
+                                                                ? "bg-[#1e293b] text-gray-200 border-[#334155]"
+                                                                : "bg-gray-100 text-gray-800 border-gray-300"
                                                         }`}
                                                 >
                                                     {t.title} — {t.points} pts
@@ -192,12 +193,13 @@ export default function History({
                 </div>
             )}
 
-            {/* BOARD MODE  */}
+            {/* BOARD MODE */}
             {mode === "board" && (
                 <div className="grid md:grid-cols-3 gap-4">
                     {dates.map((d) => {
                         const ds = format(d);
                         const dayTasks = tasks.filter((t) => t.date === ds);
+
                         const completed = dayTasks.filter((t) => t.completed);
                         const totalSP = completed.reduce((a, b) => a + b.points, 0);
                         const percent = Math.round((totalSP / defaultTarget) * 100);
@@ -206,7 +208,7 @@ export default function History({
                             <div
                                 key={ds}
                                 className={`rounded-xl border shadow p-4 transition-all
-                                ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
+                                    ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
                             >
                                 <div className="flex justify-between items-center mb-2">
                                     <h3 className="font-bold">{d.toDateString()}</h3>
@@ -234,13 +236,14 @@ export default function History({
                                     dayTasks.map((t) => (
                                         <div
                                             key={t.id}
-                                            className={`p-2 rounded border mb-2 ${t.completed
-                                                ? dark
-                                                    ? "bg-blue-900 text-blue-200 border-blue-700"
-                                                    : "bg-blue-100 text-blue-800 border-blue-300"
-                                                : dark
-                                                    ? "bg-[#1e293b] text-gray-200 border-[#334155]"
-                                                    : "bg-gray-100 text-gray-800 border-gray-300"
+                                            className={`p-2 rounded border mb-2 transition-all
+                                                ${t.completed
+                                                    ? dark
+                                                        ? "bg-blue-900 text-blue-200 border-blue-700"
+                                                        : "bg-blue-100 text-blue-800 border-blue-300"
+                                                    : dark
+                                                        ? "bg-[#1e293b] text-gray-200 border-[#334155]"
+                                                        : "bg-gray-100 text-gray-800 border-gray-300"
                                                 }`}
                                         >
                                             {t.title} — {t.points} pts
