@@ -11,25 +11,22 @@ export default function History({
 }) {
     const [mode, setMode] = useState("list");
 
-    // LOAD RANGE DARI LOCALSTORAGE
-    const savedStart = localStorage.getItem("historyStart");
-    const savedEnd = localStorage.getItem("historyEnd");
+    // Load saved range from localStorage
+    const savedStart = localStorage.getItem("historyStart") || "2025-11-27";
+    const savedEnd = localStorage.getItem("historyEnd") || "2025-12-03";
 
-    const [start, setStart] = useState(savedStart || "2025-11-27");
-    const [end, setEnd] = useState(savedEnd || "2025-12-03");
+    const [start, setStart] = useState(savedStart);
+    const [end, setEnd] = useState(savedEnd);
+
+    // Calendar popup
+    const [showCal, setShowCal] = useState(false);
+    const [range, setRange] = useState([new Date(start), new Date(end)]);
 
     
     useEffect(() => {
         localStorage.setItem("historyStart", start);
         localStorage.setItem("historyEnd", end);
     }, [start, end]);
-
-  
-    const [showCal, setShowCal] = useState(false);
-    const [range, setRange] = useState([
-        new Date(start),
-        new Date(end),
-    ]);
 
     // Generate date list
     const getDates = () => {
@@ -61,12 +58,12 @@ export default function History({
                 <button
                     onClick={() => setMode("list")}
                     className={`px-4 py-2 rounded-lg font-semibold cursor-pointer
-                        ${mode === "list"
-                            ? "bg-blue-600 text-white"
-                            : dark
-                                ? "bg-gray-700 text-white hover:bg-gray-600"
-                                : "bg-white text-black border hover:bg-gray-100"
-                        }`}
+                    ${mode === "list"
+                        ? "bg-blue-600 text-white"
+                        : dark
+                            ? "bg-gray-700 text-white hover:bg-gray-600"
+                            : "bg-white text-black border hover:bg-gray-100"
+                    }`}
                 >
                     List
                 </button>
@@ -74,18 +71,18 @@ export default function History({
                 <button
                     onClick={() => setMode("board")}
                     className={`px-4 py-2 rounded-lg font-semibold cursor-pointer
-                        ${mode === "board"
-                            ? "bg-blue-600 text-white"
-                            : dark
-                                ? "bg-gray-700 text-white hover:bg-gray-600"
-                                : "bg-white text-black border hover:bg-gray-100"
-                        }`}
+                    ${mode === "board"
+                        ? "bg-blue-600 text-white"
+                        : dark
+                            ? "bg-gray-700 text-white hover:bg-gray-600"
+                            : "bg-white text-black border hover:bg-gray-100"
+                    }`}
                 >
                     Board
                 </button>
             </div>
 
-            {/* DATE RANGE*/}
+            {/* DATE RANGE DISPLAY */}
             <div className="relative">
                 <button
                     onClick={() => setShowCal(!showCal)}
@@ -98,10 +95,14 @@ export default function History({
                     📅 {new Date(start).toDateString()} — {new Date(end).toDateString()}
                 </button>
 
+                {/* CALENDAR  */}
                 {showCal && (
                     <div
-                        className={`absolute z-50 mt-2 p-4 rounded-xl shadow-xl border
-                            ${dark ? "bg-[#0d1117] border-gray-700 text-white" : "bg-white border-gray-300"}`}
+                        className={`calendar-popup absolute z-50 mt-2 rounded-xl shadow-xl border 
+                        ${dark ? "bg-[#0d1117] border-gray-700 text-white"
+                              : "bg-white border-gray-300"
+                        }
+                        w-[95vw] max-w-[350px] p-3`}
                     >
                         <Calendar
                             selectRange={true}
@@ -111,12 +112,12 @@ export default function History({
                                 setEnd(value[1].toISOString().split("T")[0]);
                             }}
                             value={range}
-                            className={dark ? "calendar-dark" : "calendar-light"}
+                            className="rounded-lg"
                         />
 
                         <button
                             onClick={() => setShowCal(false)}
-                            className="w-full mt-3 px-3 py-1 bg-blue-600 text-white rounded cursor-pointer"
+                            className="w-full mt-3 px-3 py-2 bg-blue-600 text-white rounded cursor-pointer"
                         >
                             Done
                         </button>
@@ -130,7 +131,6 @@ export default function History({
                     {dates.map((d) => {
                         const ds = format(d);
                         const dayTasks = tasks.filter((t) => t.date === ds);
-
                         const completed = dayTasks.filter((t) => t.completed);
                         const totalSP = completed.reduce((a, b) => a + b.points, 0);
                         const percent = Math.round((totalSP / defaultTarget) * 100);
@@ -139,7 +139,8 @@ export default function History({
                             <div
                                 key={ds}
                                 className={`rounded-xl border shadow p-4 transition-all
-                                    ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
+                                    ${dark ? "bg-[#111820] border-gray-700" 
+                                           : "bg-white border-gray-300"}`}
                             >
                                 <div
                                     className="flex justify-between items-center cursor-pointer"
@@ -205,7 +206,6 @@ export default function History({
                     {dates.map((d) => {
                         const ds = format(d);
                         const dayTasks = tasks.filter((t) => t.date === ds);
-
                         const completed = dayTasks.filter((t) => t.completed);
                         const totalSP = completed.reduce((a, b) => a + b.points, 0);
                         const percent = Math.round((totalSP / defaultTarget) * 100);
@@ -214,7 +214,8 @@ export default function History({
                             <div
                                 key={ds}
                                 className={`rounded-xl border shadow p-4 transition-all
-                                    ${dark ? "bg-[#111820] border-gray-700" : "bg-white border-gray-300"}`}
+                                    ${dark ? "bg-[#111820] border-gray-700" 
+                                           : "bg-white border-gray-300"}`}
                             >
                                 <div className="flex justify-between items-center mb-2">
                                     <h3 className="font-bold">{d.toDateString()}</h3>

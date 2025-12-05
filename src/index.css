@@ -38,3 +38,33 @@
   background: #2563eb !important;
   color: white !important;
 }
+
+
+.react-calendar {
+  width: 100% !important;
+  max-width: 320px !important;
+  border-radius: 10px;
+}
+
+
+.calendar-popup .react-calendar {
+  width: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.calendar-popup .react-calendar__navigation button {
+  font-size: 14px !important;
+}
+
+.calendar-popup .react-calendar__tile {
+  padding: 8px 0 !important;
+}
+
+@media (max-width: 480px) {
+  .calendar-popup {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
